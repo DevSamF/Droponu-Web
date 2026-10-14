@@ -2,6 +2,7 @@
 import { ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { clearAuthSession } from '../auth.js'
+import { useCurrentUser } from '../composables/useCurrentUser'
 import SideBar from '../components/SideBar.vue'
 
 defineProps({
@@ -13,6 +14,7 @@ defineProps({
 
 const router = useRouter()
 const route = useRoute()
+const { email: userEmail, clear: clearCurrentUser } = useCurrentUser()
 
 const menuOpen = ref(false)
 
@@ -21,6 +23,7 @@ watch(() => route.fullPath, () => {
 })
 
 function logout() {
+  clearCurrentUser()
   clearAuthSession()
   router.push({ name: 'login' })
 }
@@ -30,7 +33,7 @@ function logout() {
   <div class="app" :class="{ 'menu-open': menuOpen }">
     <div class="scrim" @click="menuOpen = false"></div>
 
-    <SideBar :user="user" @logout="logout" />
+    <SideBar @logout="logout" />
 
     <div class="main">
       <main class="content">
@@ -46,7 +49,7 @@ function logout() {
           </button>
           <div>
             <div class="brand">Allanet</div>
-            <p class="muted hide-sm">{{ user.email || 'Usuário autenticado' }}</p>
+            <p class="muted hide-sm">{{ userEmail || user.email || 'Usuário autenticado' }}</p>
           </div>
           <button class="btn btn-ghost" type="button" @click="logout">Sair</button>
         </header>
