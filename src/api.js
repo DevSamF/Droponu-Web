@@ -1,6 +1,11 @@
 import axios from 'axios'
 import { authSession, clearAuthSession, refreshSession } from './auth'
-import router from './router'
+
+let unauthorizedHandler = null
+
+export function setUnauthorizedHandler(handler) {
+  unauthorizedHandler = handler
+}
 
 const authUrls = [
   import.meta.env.VITE_AUTH_URL,
@@ -38,8 +43,8 @@ api.interceptors.response.use(
       return api(original)
     } catch (refreshError) {
       clearAuthSession()
-      if (router.currentRoute.value.name !== 'login') {
-        router.push({ name: 'login' })
+      if (typeof unauthorizedHandler === 'function') {
+        unauthorizedHandler()
       }
       return Promise.reject(refreshError)
     }
